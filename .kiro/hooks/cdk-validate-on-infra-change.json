@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "CDK validate on infra change",
+      "trigger": "PostFileSave",
+      "description": "When any file under infra/ is saved, run cdk synth to validate the CloudFormation template.",
+      "matcher": "/infra/.*\\.(ts|json)$",
+      "action": {
+        "type": "command",
+        "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0; cd \"$ROOT/infra\" || exit 0; echo \"[cdk-validate hook] cdk synth...\" >&2; if npx cdk synth --quiet >/tmp/ss_synth.log 2>&1; then echo \"[cdk-validate hook] cdk synth OK\" >&2; else echo \"[cdk-validate hook] cdk synth FAILED:\" >&2; tail -25 /tmp/ss_synth.log >&2; fi; exit 0",
+        "timeout": 180
+      }
+    }
+  ]
+}

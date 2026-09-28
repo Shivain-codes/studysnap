@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Post-edit: typecheck changed workspace",
+      "trigger": "PostFileSave",
+      "description": "After a TS/TSX file is saved, run typecheck so type errors surface immediately.",
+      "matcher": "\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "INPUT=$(cat); FILE=$(printf '%s' \"$INPUT\" | python3 -c \"import sys,json;d=json.load(sys.stdin);print(d.get('file_path') or d.get('filePath') or '')\" 2>/dev/null); ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0; cd \"$ROOT\" || exit 0; case \"$FILE\" in *\"/infra/\"*) WS=infra;; *\"/services/\"*) WS=services;; *\"/web/\"*) WS=web;; *) exit 0;; esac; echo \"[post-edit hook] typecheck ($WS)...\" >&2; npm --workspace \"$WS\" run typecheck >/tmp/ss_tc.log 2>&1 && echo \"[post-edit hook] $WS typecheck OK\" >&2 || { echo \"[post-edit hook] $WS typecheck errors:\" >&2; tail -25 /tmp/ss_tc.log >&2; }; exit 0",
+        "timeout": 90
+      }
+    }
+  ]
+}

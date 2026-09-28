@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Pre-commit: lint + tests",
+      "trigger": "PreToolUse",
+      "description": "Before any git commit, run lint and tests; block the commit (exit 2) if they fail.",
+      "matcher": "execute_bash",
+      "action": {
+        "type": "command",
+        "command": "INPUT=$(cat); CMD=$(printf '%s' \"$INPUT\" | python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null); if printf '%s' \"$CMD\" | grep -q \"git commit\"; then echo \"[pre-commit hook] running lint + tests...\" >&2; cd \"$(git rev-parse --show-toplevel 2>/dev/null)\" || exit 0; if npm run lint >/tmp/ss_lint.log 2>&1 && npm test >/tmp/ss_test.log 2>&1; then echo \"[pre-commit hook] lint + tests passed\" >&2; exit 0; else echo \"[pre-commit hook] BLOCKED: lint or tests failed. See /tmp/ss_lint.log and /tmp/ss_test.log\" >&2; tail -20 /tmp/ss_lint.log /tmp/ss_test.log >&2; exit 2; fi; fi; exit 0",
+        "timeout": 120
+      }
+    }
+  ]
+}
