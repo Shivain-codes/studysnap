@@ -30,10 +30,14 @@
   - Outputs saved to `infra/outputs.json`
 - **Commit:** `feat(infra): skeleton stack + /health + $20 billing alarm`
 
-### T3. Frontend shell on Amplify Hosting
-- [ ] Vite React app; single page that fetches `/health` and renders "ok".
-- [ ] Connect repo to Amplify Hosting; first deploy.
-- **Done when:** public HTTPS Amplify URL loads and shows backend "ok". **← SHIP GATE MET.**
+### T3. Frontend shell on Amplify Hosting ✅ DONE (deployed & verified)
+- [x] Vite + React + TS app; shell page fetches `/health`, renders connected/loading/error + retry.
+- [x] Brand color scheme applied; mobile-first card layout.
+- [x] Amplify Hosting app created (`d1wkxjr5bl55l7`), `main` branch, manual zip deploy.
+- **VERIFIED LIVE — SHIP GATE MET:**
+  - Web: `https://main.d1wkxjr5bl55l7.amplifyapp.com/` → 200, title + shell served
+  - CORS preflight 204; health GET from web origin → 200 `{"status":"ok"}`
+- **Note:** manual deploy for Day-1 speed; git-based Amplify CI wired in T4 once repo exists.
 - **Commit:** `feat(web): app shell wired to /health, deployed to Amplify`
 
 ### T4. CI/CD — GitHub Actions

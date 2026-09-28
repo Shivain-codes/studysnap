@@ -7,5 +7,8 @@
   "userPoolClientId": "au8p7tlunoeet8jrlflb87dhv",
   "uploadsBucketName": "studysnapstack-uploadsbucket5e5e9b64-83kgxe5ao1uq",
   "tableName": "StudySnap",
-  "aiModelId": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  "aiModelId": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "amplifyAppId": "d1wkxjr5bl55l7",
+  "amplifyBranch": "main",
+  "webUrl": "https://main.d1wkxjr5bl55l7.amplifyapp.com/"
 }
