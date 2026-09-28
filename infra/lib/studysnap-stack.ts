@@ -82,7 +82,9 @@ export class StudySnapStack extends cdk.Stack {
 
     const userPoolClient = new cognito.UserPoolClient(this, 'UserPoolClient', {
       userPool,
-      authFlows: { userSrp: true },
+      // userSrp: browser flow via Amplify Authenticator.
+      // adminUserPassword: server-side flow for automated end-to-end auth tests.
+      authFlows: { userSrp: true, adminUserPassword: true },
       preventUserExistenceErrors: true,
     });
 
@@ -102,9 +104,22 @@ export class StudySnapStack extends cdk.Stack {
       },
     });
 
-    // NOTE: the Cognito authorizer is added alongside the feature routes it
-    // protects (T6+). CDK rejects an authorizer that isn't attached to a method,
-    // so it is intentionally omitted from this skeleton.
+    // ---- Cognito authorizer (protects /uploads*) ------------------------
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
+      cognitoUserPools: [userPool],
+    });
+
+    // Shared env + a helper to keep feature Lambdas consistent.
+    const commonEnv = {
+      TABLE_NAME: table.tableName,
+      UPLOADS_BUCKET: uploadsBucket.bucketName,
+      AI_MODEL_ID: props.aiModelId,
+    };
+    const makeLogGroup = (name: string) =>
+      new logs.LogGroup(this, `${name}LogGroup`, {
+        retention: logs.RetentionDays.ONE_WEEK,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      });
 
     // ---- /health Lambda (public, no auth) -------------------------------
     const healthLogGroup = new logs.LogGroup(this, 'HealthFnLogGroup', {
@@ -126,6 +141,24 @@ export class StudySnapStack extends cdk.Stack {
     });
 
     api.root.addResource('health').addMethod('GET', new apigateway.LambdaIntegration(healthFn));
+
+    // ---- /uploads (auth-gated) ------------------------------------------
+    const listUploadsFn = new lambdaNode.NodejsFunction(this, 'ListUploadsFn', {
+      entry: path.join(__dirname, '..', '..', 'services', 'src', 'listUploads.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(15),
+      logGroup: makeLogGroup('ListUploadsFn'),
+      environment: commonEnv,
+    });
+    table.grantReadData(listUploadsFn);
+
+    const uploads = api.root.addResource('uploads');
+    uploads.addMethod('GET', new apigateway.LambdaIntegration(listUploadsFn), {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     // ---- $20 billing alarm ----------------------------------------------
     const billingTopic = new sns.Topic(this, 'BillingAlarmTopic', {

@@ -63,10 +63,18 @@
 
 ## Milestone C — Auth
 
-### T6. Cognito + Amplify Authenticator
-- [ ] Wire `@aws-amplify/ui-react` Authenticator drop-in (email signup/login/logout).
-- [ ] Protect app routes; attach JWT to API calls; API Gateway Cognito authorizer on `/uploads*`.
-- **Done when:** sign up → confirm → log in → see empty dashboard; API rejects unauth calls (401).
+### T6. Cognito + Amplify Authenticator ✅ DONE (deployed & verified)
+- [x] `@aws-amplify/ui-react` Authenticator drop-in (email signup/login/logout) wraps the app.
+- [x] Top bar with user email + Sign out; auth-gated Dashboard placeholder.
+- [x] `api.ts` attaches Cognito JWT (`Authorization: Bearer`) to every request; `ApiError` handling.
+- [x] Backend: Cognito authorizer + `GET /uploads` (listUploads Lambda, user-scoped DynamoDB query).
+- [x] Lambda `getUserId` derives userId from JWT `sub` (never trusted from client).
+- **VERIFIED:**
+  - `/uploads` no/invalid token → 403 (denied); `/health` still public → 200
+  - Authenticated JWT → `GET /uploads` → 200 `{"items":[]}` (full chain: Cognito→APIGW→Lambda→DDB)
+  - Frontend with Authenticator redeployed live (Amplify job 2)
+  - Enabled `adminUserPassword` auth flow for automated e2e auth tests (browser still uses SRP)
+- **Test user:** `tester@studysnap.dev` (for e2e + proof screenshots)
 - **Commit:** `feat(auth): cognito + amplify authenticator, protected routes`
 
 ---

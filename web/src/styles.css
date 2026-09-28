@@ -105,3 +105,91 @@ body {
 .btn:hover {
   background: var(--primary-dark);
 }
+
+/* ---- Authenticated app chrome ---- */
+.app {
+  min-height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
+}
+
+.logo {
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-email {
+  font-size: 0.85rem;
+  color: #64748b;
+  max-width: 45vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-ghost {
+  border: 1px solid #e2e8f0;
+  background: transparent;
+  color: var(--ink);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  background: var(--muted-bg);
+}
+
+.content {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.page-title {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.4rem;
+}
+
+.empty-card {
+  margin-top: 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.empty-card .hint {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Amplify Authenticator brand color */
+[data-amplify-authenticator] {
+  --amplify-components-button-primary-background-color: var(--primary);
+  --amplify-components-button-primary-hover-background-color: var(--primary-dark);
+  --amplify-components-tabs-item-active-color: var(--primary);
+}
