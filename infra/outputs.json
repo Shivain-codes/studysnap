@@ -1,0 +1,11 @@
+{
+  "region": "us-east-1",
+  "account": "<AWS_ACCOUNT_ID>",
+  "apiUrl": "https://u1g7hquhsf.execute-api.us-east-1.amazonaws.com/prod/",
+  "healthUrl": "https://u1g7hquhsf.execute-api.us-east-1.amazonaws.com/prod/health",
+  "userPoolId": "us-east-1_FTWr35GEJ",
+  "userPoolClientId": "au8p7tlunoeet8jrlflb87dhv",
+  "uploadsBucketName": "studysnapstack-uploadsbucket5e5e9b64-83kgxe5ao1uq",
+  "tableName": "StudySnap",
+  "aiModelId": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+}

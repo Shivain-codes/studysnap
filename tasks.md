@@ -9,20 +9,25 @@
 
 ## Milestone A — Day-1 Skeleton (SHIP GATE: public URL live)
 
-### T1. Repo scaffold + tooling
-- [ ] `git init`; monorepo layout: `/infra` (CDK TS), `/services` (Lambdas), `/web` (React+Vite).
-- [ ] Root `package.json` workspaces; `.gitignore` (node_modules, cdk.out, .env, dist).
-- [ ] TypeScript + ESLint + Prettier configs shared.
-- **Done when:** `npm install` succeeds at root; lint runs clean.
-- **Commit:** `chore: scaffold monorepo (infra/services/web)`
+### T1. Repo scaffold + tooling ✅ DONE
+- [x] `git init`; monorepo layout: `/infra` (CDK TS), `/services` (Lambdas), `/web` (React+Vite).
+- [x] Root `package.json` workspaces; `.gitignore` (node_modules, cdk.out, .env, dist).
+- [x] TypeScript + ESLint + Prettier configs shared.
+- **Done:** `npm install` succeeds; both workspaces typecheck clean.
+- **Commit:** `chore: scaffold monorepo (infra/services/web)` (078e528)
 
-### T2. CDK skeleton stack + `/health`
-- [ ] CDK app in `/infra`; `StudySnapStack` with: DynamoDB table `StudySnap` (PK/SK, on-demand),
-      S3 uploads bucket (CORS for browser PUT, block public access), Cognito User Pool + client.
-- [ ] API Gateway (REST) + `GET /health` Lambda → `{status:"ok"}` (no auth on this route).
-- [ ] **$20 CloudWatch billing alarm** on `AWS/Billing EstimatedCharges` + SNS email sub.
-- [ ] `cdk bootstrap` (once) then `cdk deploy`.
-- **Done when:** `curl https://<api>/health` returns `{"status":"ok"}`; alarm visible in console.
+### T2. CDK skeleton stack + `/health` ✅ DONE (deployed & verified)
+- [x] CDK app in `/infra`; `StudySnapStack`: DynamoDB `StudySnap` (PK/SK, on-demand, PITR),
+      S3 uploads bucket (browser CORS, block public access), Cognito User Pool + client.
+- [x] API Gateway (REST) + `GET /health` Lambda → `{status:"ok"}` (public route).
+- [x] **$20 CloudWatch billing alarm** on `AWS/Billing EstimatedCharges` + SNS topic
+      (email subscription added once ALARM_EMAIL provided).
+- [x] `cdk bootstrap` + `cdk deploy` succeeded.
+- **VERIFIED LIVE:**
+  - Health: `https://u1g7hquhsf.execute-api.us-east-1.amazonaws.com/prod/health` → 200 `{"status":"ok",...}`
+  - Billing alarm `StudySnap-Billing-Over-20USD` threshold 20.0, state OK
+  - DynamoDB `StudySnap` ACTIVE; Cognito pool `us-east-1_FTWr35GEJ`
+  - Outputs saved to `infra/outputs.json`
 - **Commit:** `feat(infra): skeleton stack + /health + $20 billing alarm`
 
 ### T3. Frontend shell on Amplify Hosting
