@@ -11,6 +11,8 @@ import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as cwActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubs from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as path from 'path';
 
 export interface StudySnapStackProps extends cdk.StackProps {
@@ -173,6 +175,55 @@ export class StudySnapStack extends cdk.Stack {
     };
     uploads.addMethod('GET', new apigateway.LambdaIntegration(listUploadsFn), cognitoAuth);
     uploads.addMethod('POST', new apigateway.LambdaIntegration(getUploadUrlFn), cognitoAuth);
+
+    // ---- processNotes: S3-trigger -> Bedrock -> DynamoDB ----------------
+    const processNotesFn = new lambdaNode.NodejsFunction(this, 'ProcessNotesFn', {
+      entry: path.join(__dirname, '..', '..', 'services', 'src', 'processNotes.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 1024, // headroom for PDF parsing + base64 image
+      timeout: cdk.Duration.minutes(2),
+      logGroup: makeLogGroup('ProcessNotesFn'),
+      environment: commonEnv,
+      bundling: {
+        // unpdf ships an ESM pdf.js build; keep it external and installed in the bundle.
+        nodeModules: ['unpdf'],
+      },
+    });
+    table.grantWriteData(processNotesFn);
+    uploadsBucket.grantRead(processNotesFn);
+
+    // Bedrock: allow InvokeModel on the primary (Haiku) + Sonnet fallback, on BOTH
+    // the inference-profile ARNs and the underlying foundation-model ARNs
+    // (cross-region inference profiles require both).
+    const modelSlugs = [
+      'claude-haiku-4-5-20251001-v1:0',
+      'claude-sonnet-4-5-20250929-v1:0',
+    ];
+    const bedrockResources: string[] = [];
+    for (const slug of modelSlugs) {
+      // Inference profiles (us. and the region-specific copies).
+      bedrockResources.push(
+        `arn:aws:bedrock:*:${this.account}:inference-profile/us.anthropic.${slug}`,
+      );
+      // Foundation models across US regions the profile can route to.
+      for (const r of ['us-east-1', 'us-east-2', 'us-west-2']) {
+        bedrockResources.push(`arn:aws:bedrock:${r}::foundation-model/anthropic.${slug}`);
+      }
+    }
+    processNotesFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['bedrock:InvokeModel'],
+        resources: bedrockResources,
+      }),
+    );
+
+    // Trigger processNotes when a file is uploaded under uploads/.
+    uploadsBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(processNotesFn),
+      { prefix: 'uploads/' },
+    );
 
     // ---- $20 billing alarm ----------------------------------------------
     const billingTopic = new sns.Topic(this, 'BillingAlarmTopic', {

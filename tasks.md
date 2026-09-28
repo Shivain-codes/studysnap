@@ -99,13 +99,20 @@
 
 ## Milestone E — Generation
 
-### T8. `processNotes` Lambda (S3 trigger)
-- [ ] S3 `ObjectCreated` trigger. PDF → `unpdf` text; image → Claude Haiku multimodal.
-- [ ] One Claude call → strict JSON (summary, topics, 10 flashcards, 5 quiz w/ topic tags).
-- [ ] Validate shape/counts; one retry on bad JSON; write kit + status `READY`/`FAILED`.
-- [ ] `aiClient` reads `AI_MODEL_ID` (Haiku default; Sonnet fallback). Structured logs.
-- **Done when:** uploading a PDF and a photo each yields a READY kit with correct counts.
-- **Commit:** `feat(generate): processNotes -> kit via Claude Haiku`
+### T8. `processNotes` Lambda (S3 trigger) 🟡 CODE DEPLOYED — BLOCKED on Bedrock use-case form
+- [x] S3 `ObjectCreated` trigger (prefix `uploads/`) → processNotes Lambda.
+- [x] PDF → `unpdf` text; image → Claude Haiku multimodal (base64).
+- [x] One Claude call → strict JSON; `validateKit` enforces 10 flashcards / 5 quiz / 4 options;
+      one retry on bad output; writes `READY` (+summary/topics/flashcards/quiz) or `FAILED` (+error).
+- [x] `aiClient` seam reads `AI_MODEL_ID` (Haiku default; Sonnet fallback). Structured logs.
+- [x] IAM: `bedrock:InvokeModel` on inference-profile + foundation-model ARNs (Haiku + Sonnet).
+- **PIPELINE VERIFIED to work; AI call BLOCKED:** upload→S3 trigger→unpdf→Bedrock→DDB all fired.
+  Bedrock returned account-level block: *"Model use case details have not been submitted for
+  this account. Fill out the Anthropic use case details form before using the model."*
+  Handler correctly caught it and wrote status `FAILED` with the reason.
+- **UNBLOCK (user action):** Bedrock console (us-east-1) → Model access → Anthropic →
+  submit use-case details form. Grants in ~15 min. No code change needed after.
+- **Commit:** held until a real READY kit is produced.
 
 ### T9. Dashboard + kit detail
 - [ ] Dashboard: list uploads with status pills + date; poll `GET /uploads/{id}` until READY.
