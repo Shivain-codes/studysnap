@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { apiPath, config } from '../config';
 
 type HealthState =
@@ -32,14 +33,19 @@ export default function Dashboard() {
 
   return (
     <div className="page">
-      <h2 className="page-title">Your study kits</h2>
+      <div className="page-head">
+        <h2 className="page-title">Your study kits</h2>
+        <Link to="/upload" className="btn">
+          ＋ Upload notes
+        </Link>
+      </div>
       <p className="tagline">
         Upload lecture notes to generate summaries, flashcards, and adaptive quizzes.
       </p>
 
       <div className="empty-card">
         <p>No uploads yet.</p>
-        <p className="hint">Upload is coming online next — the backend is ready.</p>
+        <p className="hint">Tap “Upload notes” to create your first study kit.</p>
 
         {health.kind === 'loading' && (
           <span className="status-row loading">

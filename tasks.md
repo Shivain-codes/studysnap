@@ -81,12 +81,18 @@
 
 ## Milestone D — Upload
 
-### T7. `getUploadUrl` Lambda + client upload
-- [ ] `POST /uploads` → validate type/size, mint `uploadId` (ULID), pre-signed S3 PUT URL,
-      write `UPLOAD#` item status `PROCESSING`.
-- [ ] Client: type+size validation; **downscale images to ≤1568px longest side (JPEG)** pre-upload;
-      progress bar; redirect to kit detail (PROCESSING).
-- **Done when:** file lands in S3 under `uploads/<userId>/<uploadId>/`; DDB item created.
+### T7. `getUploadUrl` Lambda + client upload ✅ DONE (deployed & verified)
+- [x] `POST /uploads` → validate type/size, mint `uploadId` (ULID), pre-signed S3 PUT URL,
+      write `UPLOAD#` item status `PROCESSING`. Returns 400 (bad type) / 413 (too large).
+- [x] Client: type+size validation; **downscale images to ≤1568px longest side, JPEG re-encode**
+      (`web/src/lib/image.ts`); XHR progress bar; redirect to kit detail.
+- [x] React Router added: Dashboard / Upload / KitDetail; "＋ Upload notes" on dashboard;
+      camera-first file input (`capture="environment"`). Amplify SPA rewrite rule added.
+- **VERIFIED (full round trip):**
+  - authed `POST /uploads` → 200 with presigned URL + user-scoped s3Key
+  - bad type → 400; oversized → 413
+  - PUT to presigned URL → 200, file in S3; DDB shows `PROCESSING`
+  - frontend redeployed; `/` and deep-link `/upload` both 200
 - **Commit:** `feat(upload): presigned url + client validation/downscale`
 
 ---

@@ -154,11 +154,25 @@ export class StudySnapStack extends cdk.Stack {
     });
     table.grantReadData(listUploadsFn);
 
+    const getUploadUrlFn = new lambdaNode.NodejsFunction(this, 'GetUploadUrlFn', {
+      entry: path.join(__dirname, '..', '..', 'services', 'src', 'getUploadUrl.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(15),
+      logGroup: makeLogGroup('GetUploadUrlFn'),
+      environment: commonEnv,
+    });
+    table.grantWriteData(getUploadUrlFn);
+    uploadsBucket.grantPut(getUploadUrlFn);
+
     const uploads = api.root.addResource('uploads');
-    uploads.addMethod('GET', new apigateway.LambdaIntegration(listUploadsFn), {
+    const cognitoAuth = {
       authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
-    });
+    };
+    uploads.addMethod('GET', new apigateway.LambdaIntegration(listUploadsFn), cognitoAuth);
+    uploads.addMethod('POST', new apigateway.LambdaIntegration(getUploadUrlFn), cognitoAuth);
 
     // ---- $20 billing alarm ----------------------------------------------
     const billingTopic = new sns.Topic(this, 'BillingAlarmTopic', {

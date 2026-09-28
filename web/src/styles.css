@@ -193,3 +193,50 @@ body {
   --amplify-components-button-primary-hover-background-color: var(--primary-dark);
   --amplify-components-tabs-item-active-color: var(--primary);
 }
+
+/* ---- Upload + dashboard head ---- */
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.upload-card {
+  margin-top: 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-lg {
+  font-size: 1.05rem;
+  padding: 0.9rem 1.4rem;
+}
+
+.progress {
+  width: 100%;
+  height: 0.6rem;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.2s ease;
+}
+
+a.logo {
+  text-decoration: none;
+}
+a.btn {
+  text-decoration: none;
+  display: inline-block;
+}
