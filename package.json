@@ -1,0 +1,26 @@
+{
+  "name": "studysnap",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StudySnap — AI study assistant. Turn lecture notes into summaries, flashcards, and adaptive quizzes.",
+  "workspaces": [
+    "infra",
+    "services",
+    "web"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "format": "prettier --write .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "synth": "npm --workspace infra run synth",
+    "deploy": "npm --workspace infra run deploy"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  }
+}
