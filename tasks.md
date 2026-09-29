@@ -40,12 +40,15 @@
 - **Note:** manual deploy for Day-1 speed; git-based Amplify CI wired in T4 once repo exists.
 - **Commit:** `feat(web): app shell wired to /health, deployed to Amplify`
 
-### T4. CI/CD — GitHub Actions
-- [ ] Workflow: push to `main` → install → lint → test → `cdk deploy` (backend);
-      Amplify auto-builds frontend on push (or explicit build step).
-- [ ] Store AWS creds as GitHub OIDC role (preferred) or repo secrets.
-- **Done when:** a push to main deploys both without manual steps.
-- **Commit:** `ci: deploy backend+frontend on push to main`
+### T4. CI/CD — GitHub Actions 🟡 WORKFLOW WRITTEN — needs repo + OIDC role to activate
+- [x] `.github/workflows/deploy.yml`: push to `main` → npm ci → lint → test → typecheck →
+      build frontend → (OIDC) `cdk deploy` backend → optional Amplify frontend deploy.
+- [x] Uses **GitHub OIDC** (`vars.AWS_DEPLOY_ROLE_ARN`) — no long-lived secrets. Steps are
+      guarded so the workflow is valid even before the role/repo vars exist.
+- [ ] **Needs from user:** create/point a GitHub repo; add an IAM role trusting the repo
+      (OIDC) as repo variable `AWS_DEPLOY_ROLE_ARN`; optional `AMPLIFY_APP_ID=d1wkxjr5bl55l7`.
+      Then connect the repo to Amplify Hosting for git-based frontend builds.
+- **Commit:** `ci: deploy workflow (push to main -> lint/test/build/deploy via OIDC)`
 
 ---
 
@@ -156,10 +159,12 @@
   left other uploads' data intact (204). Structured logs confirmed (surfaced the `partial` bug live).
 - **Commit:** `feat: delete flow + structured cloudwatch logging`
 
-### T12. README + proof
-- [ ] `README.md`: architecture diagram, setup steps, live demo link, screenshots,
-      "how I used Kiro + AWS" (agentic workflow). Include console-connection proof.
-- **Commit:** `docs: readme with architecture, demo link, screenshots, ai/agent story`
+### T12. README + proof ✅ DONE
+- [x] `README.md`: architecture (mermaid), tech stack, API table, setup/deploy steps,
+      live demo link, screenshot checklist, "how I used AI agents + AWS", cost, structure.
+- [x] Notes the Nova-vs-Claude decision honestly; links AGENTS.md for the agentic workflow +
+      Kiro→AWS console-connection proof.
+- **Commit:** `docs: readme with architecture, demo link, ai/agent story`
 
 ### T13. End-to-end verification on live URL
 - [ ] On the public URL: signup/login; upload a PDF and a handwritten photo; confirm kit

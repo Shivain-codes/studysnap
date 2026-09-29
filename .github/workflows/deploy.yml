@@ -1,0 +1,68 @@
+name: Deploy StudySnap
+
+# Push to main -> lint + test + build, then deploy the CDK backend.
+# Amplify Hosting builds the frontend from the connected branch automatically;
+# this workflow can also trigger an Amplify job if AMPLIFY_APP_ID is set.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write # for AWS OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build frontend
+        run: npm --workspace web run build
+
+      # --- AWS auth via OIDC (no long-lived secrets) ---
+      # Set repo variable AWS_DEPLOY_ROLE_ARN to an IAM role that trusts this repo.
+      - name: Configure AWS credentials (OIDC)
+        if: vars.AWS_DEPLOY_ROLE_ARN != ''
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy CDK backend
+        if: vars.AWS_DEPLOY_ROLE_ARN != ''
+        run: npm --workspace infra run deploy
+
+      # Optional: trigger an Amplify manual deploy of the freshly built frontend.
+      # Requires vars.AMPLIFY_APP_ID. Amplify git-based builds also work without this.
+      - name: Deploy frontend to Amplify
+        if: vars.AWS_DEPLOY_ROLE_ARN != '' && vars.AMPLIFY_APP_ID != ''
+        run: |
+          cd web/dist && zip -r ../dist.zip . && cd ..
+          DEPLOY=$(aws amplify create-deployment --app-id "${{ vars.AMPLIFY_APP_ID }}" --branch-name main --region "$AWS_REGION" --output json)
+          JOB=$(echo "$DEPLOY" | python3 -c "import sys,json;print(json.load(sys.stdin)['jobId'])")
+          URL=$(echo "$DEPLOY" | python3 -c "import sys,json;print(json.load(sys.stdin)['zipUploadUrl'])")
+          curl -s -X PUT -H "Content-Type: application/zip" --upload-file dist.zip "$URL"
+          aws amplify start-deployment --app-id "${{ vars.AMPLIFY_APP_ID }}" --branch-name main --job-id "$JOB" --region "$AWS_REGION"
