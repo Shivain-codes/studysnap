@@ -1,4 +1,4 @@
-import { invokeClaude, parseJsonObject, type ClaudeImage } from './aiClient';
+import { invokeAI, parseJsonObject, type AIImage } from './aiClient';
 
 export interface Flashcard {
   front: string;
@@ -54,7 +54,7 @@ export function validateKit(kit: StudyKit): void {
 
 interface GenerateInput {
   notesText?: string;
-  image?: ClaudeImage;
+  image?: AIImage;
 }
 
 /** Generate a study kit from notes text or an image. Retries once on bad output. */
@@ -64,7 +64,7 @@ export async function generateKit(input: GenerateInput): Promise<StudyKit> {
     : `Here are my lecture notes:\n\n${(input.notesText ?? '').slice(0, MAX_NOTES_CHARS)}`;
 
   const attempt = async (): Promise<StudyKit> => {
-    const raw = await invokeClaude({
+    const raw = await invokeAI({
       system: SYSTEM_PROMPT,
       userText,
       images: input.image ? [input.image] : undefined,

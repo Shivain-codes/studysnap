@@ -99,25 +99,29 @@
 
 ## Milestone E — Generation
 
-### T8. `processNotes` Lambda (S3 trigger) 🟡 CODE DEPLOYED — BLOCKED on Bedrock use-case form
+### T8. `processNotes` Lambda (S3 trigger) ✅ DONE (deployed & PROVEN on Amazon Nova)
 - [x] S3 `ObjectCreated` trigger (prefix `uploads/`) → processNotes Lambda.
-- [x] PDF → `unpdf` text; image → Claude Haiku multimodal (base64).
-- [x] One Claude call → strict JSON; `validateKit` enforces 10 flashcards / 5 quiz / 4 options;
-      one retry on bad output; writes `READY` (+summary/topics/flashcards/quiz) or `FAILED` (+error).
-- [x] `aiClient` seam reads `AI_MODEL_ID` (Haiku default; Sonnet fallback). Structured logs.
-- [x] IAM: `bedrock:InvokeModel` on inference-profile + foundation-model ARNs (Haiku + Sonnet).
-- **PIPELINE VERIFIED to work; AI call BLOCKED:** upload→S3 trigger→unpdf→Bedrock→DDB all fired.
-  Bedrock returned account-level block: *"Model use case details have not been submitted for
-  this account. Fill out the Anthropic use case details form before using the model."*
-  Handler correctly caught it and wrote status `FAILED` with the reason.
-- **UNBLOCK (user action):** Bedrock console (us-east-1) → Model access → Anthropic →
-  submit use-case details form. Grants in ~15 min. No code change needed after.
-- **Commit:** held until a real READY kit is produced.
+- [x] PDF → `unpdf` text; image → Amazon Nova multimodal (base64).
+- [x] One model call → strict JSON; `validateKit` enforces 10 flashcards / 5 quiz / 4 options;
+      one retry on bad output; writes `READY` (+summary/topics/flashcards/quiz) or `FAILED`.
+- [x] `aiClient` seam supports Nova (Converse-style) + Claude (Messages); reads `AI_MODEL_ID`.
+- [x] IAM: `bedrock:InvokeModel` on Nova Lite/Pro + Claude Haiku/Sonnet ARNs (profiles + FMs).
+- **MODEL SWITCH:** Claude blocked by account Marketplace billing (`INVALID_PAYMENT_INSTRUMENT`,
+  confirmed in console playground). Switched PRIMARY to **Amazon Nova Lite** (first-party,
+  multimodal, unblocked). Claude stays as `AI_MODEL_ID` fallback.
+- **PROVEN with real invocation:** uploaded a PDF → READY kit with 6 topics, coherent summary,
+  **exactly 10 flashcards + 5 quiz** (4 options, valid answerIndex, topic-tagged). STRUCTURE VALID.
+- **Quiz-Me grading tested on Nova Lite:** correct/partial/incorrect all graded accurately with
+  good explanations → Lite is sufficient; `QUIZ_MODEL_ID` can flip to Nova Pro if needed.
+- **Commit:** `feat(ai): switch primary to Amazon Nova; processNotes proven end-to-end`
 
-### T9. Dashboard + kit detail
-- [ ] Dashboard: list uploads with status pills + date; poll `GET /uploads/{id}` until READY.
-- [ ] Kit detail tabs: Summary · Flashcards (flip) · Quiz (5-Q reveal). Loading/empty/error states.
-- **Done when:** user sees generated content; status transitions render live.
+### T9. Dashboard + kit detail ✅ DONE (deployed & verified)
+- [x] Backend: `GET /uploads/{uploadId}` getUpload Lambda (user-scoped, returns kit + status).
+- [x] Dashboard: lists uploads with status pills (Ready/Processing/Failed) + date; empty/error/retry.
+- [x] Kit detail: topic chips + tabs — Summary (prose) · Flashcards (flip + prev/next counter) ·
+      Quiz (tap option → correct/wrong reveal). Polls `GET /uploads/{id}` every 4s while PROCESSING.
+- [x] Loading / empty / error / FAILED states throughout.
+- **Verified:** backend deployed; frontend redeployed live (root 200, SPA routing works).
 - **Commit:** `feat(web): dashboard + kit detail (summary/flashcards/quiz)`
 
 ---

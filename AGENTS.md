@@ -55,8 +55,12 @@ the submission):
 1. **AWS credentials** configured locally via `aws configure` (IAM user `<IAM_USER>`,
    account `<AWS_ACCOUNT_ID>`, region `us-east-1`). ✎ screenshot: `aws sts get-caller-identity`.
 2. **Bedrock access verified by real invocation** (not assumption): `bedrock-runtime
-   invoke-model` against `us.anthropic.claude-haiku-4-5-20251001-v1:0` returned a live
-   completion. ✎ screenshot: the model returning `STUDYSNAP_OK` with token usage.
+   invoke-model` against **`us.amazon.nova-lite-v1:0`** returned a live completion, and a
+   real PDF upload produced a valid study kit (10 flashcards + 5 quiz). ✎ screenshot: the
+   model returning `STUDYSNAP_OK` / a READY kit.
+   > Note: Anthropic Claude is wired as an env-var fallback but is blocked on this account
+   > by an AWS Marketplace billing constraint (`INVALID_PAYMENT_INSTRUMENT`). Amazon Nova is
+   > first-party and works, so it is the primary engine.
 3. **CDK bootstrap** of `aws://<AWS_ACCOUNT_ID>/us-east-1`. ✎ screenshot: `CDKToolkit` stack
    `CREATE_COMPLETE`.
 4. **One-command deploy** — `npm run deploy` (`cdk deploy`) created the API, DynamoDB table,
@@ -81,8 +85,9 @@ the submission):
 ## 4. How AI + AWS were used together
 - **Kiro** (agentic IDE) wrote the spec, CDK stack, Lambdas, and React app, and ran the
   verification hooks on every change.
-- **Amazon Bedrock (Claude Haiku 4.5)** is the product's AI engine: note summarization,
+- **Amazon Bedrock (Amazon Nova Lite)** is the product's AI engine: note summarization,
   flashcard/quiz generation, multimodal handwriting reading, and the adaptive Quiz-Me tutor.
+  Anthropic Claude remains a one-env-var fallback.
 - **AWS CDK** expresses all infra as code; **Amplify Hosting** serves the frontend over HTTPS.
 
 _Updated as the build progresses._

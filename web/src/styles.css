@@ -240,3 +240,202 @@ a.btn {
   text-decoration: none;
   display: inline-block;
 }
+
+/* ---- Kit list ---- */
+.kit-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.kit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface);
+  border-radius: 0.9rem;
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1.1rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+.kit-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.kit-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kit-date {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pill.ok {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+.pill.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+.pill.loading {
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--primary-dark);
+}
+
+/* ---- Chips / tabs ---- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 1rem;
+}
+.chip {
+  background: rgba(79, 70, 229, 0.08);
+  color: var(--primary-dark);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+.tab {
+  border: none;
+  background: transparent;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* ---- Summary ---- */
+.prose-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* ---- Flashcards ---- */
+.flash-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.flashcard {
+  width: 100%;
+  min-height: 12rem;
+  border: none;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-align: center;
+}
+.flashcard.flipped {
+  background: #eef2ff;
+}
+.flash-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  font-weight: 700;
+}
+.flash-text {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.flash-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.counter {
+  font-size: 0.85rem;
+  color: #64748b;
+  min-width: 3.5rem;
+  text-align: center;
+}
+
+/* ---- Quiz ---- */
+.quiz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.quiz-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+.quiz-q {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.quiz-opt {
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  background: var(--muted-bg);
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.quiz-opt:disabled {
+  cursor: default;
+}
+.quiz-opt.correct {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--accent);
+  color: #047857;
+  font-weight: 600;
+}
+.quiz-opt.wrong {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: var(--error);
+  color: #b91c1c;
+}

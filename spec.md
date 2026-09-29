@@ -13,18 +13,23 @@ Confirmed by live `bedrock-runtime invoke-model`, not assumption:
 
 - **Account:** `<AWS_ACCOUNT_ID>` · **IAM user:** `<IAM_USER>` · **Region:** `us-east-1`
 - **PRIMARY model (everything — kit generation, vision/handwriting, Quiz-Me turns):**
-  `us.anthropic.claude-haiku-4-5-20251001-v1:0`
-- **Fallback (config flag only):** `us.anthropic.claude-sonnet-4-5-20250929-v1:0` — enabled
-  via env var `AI_MODEL_ID` **only if** Haiku grading/generation quality disappoints in
-  testing. One primary model = one IAM policy, one prompt-tuning target.
-- **Critical detail:** invoke via **`us.` inference-profile IDs**, not raw model IDs
-  (raw IDs return "on-demand throughput isn't supported"). IAM must allow
-  `bedrock:InvokeModel` on both the inference-profile ARN and the foundation-model ARNs
-  (both Haiku and the Sonnet fallback, so the flag flip needs no redeploy of IAM).
-- **Pluggable `aiClient` seam:** model id read from config/env; swapping primary↔fallback
-  (or to NVIDIA NIM) touches no business logic.
+  **Amazon Nova Lite** `us.amazon.nova-lite-v1:0` — first-party AWS Bedrock model,
+  multimodal, low latency/cost. **Proven by live invocation** (real READY kit: 10 flashcards
+  + 5 quiz; Quiz-Me free-text grading verified correct/partial/incorrect).
+- **Quiz-Me model (per-feature, configurable):** `QUIZ_MODEL_ID`, defaults to Nova Lite.
+  Nova Lite grading tested strong; flip to `us.amazon.nova-pro-v1:0` if any case disappoints.
+- **Fallback (config flag only):** Anthropic **Claude Haiku 4.5**
+  `us.anthropic.claude-haiku-4-5-20251001-v1:0` (Sonnet 4.5 also wired). Enabled via
+  `AI_MODEL_ID` **if** the Anthropic Marketplace subscription clears on this account.
+  > Why not Claude as primary: this account (AWS India / UPI billing) cannot complete the
+  > Anthropic **Marketplace subscription** (`INVALID_PAYMENT_INSTRUMENT`), which blocks
+  > `InvokeModel` for Claude — confirmed in the console playground too. Nova is first-party
+  > and unaffected. One env var flips back to Claude if billing ever resolves.
+- **Pluggable `aiClient` seam:** model id read from config/env; `aiClient` formats requests
+  per family (Nova Converse-style vs Anthropic Messages). Swapping models touches no
+  business logic. IAM allows `bedrock:InvokeModel` on Nova (Lite+Pro) and Claude ARNs.
 
-**Vision path:** handwritten/photo notes are sent directly to Claude Haiku (multimodal).
+**Vision path:** handwritten/photo notes are sent directly to Amazon Nova (multimodal).
 PDFs have text extracted in-Lambda with `unpdf` (serverless-friendly, no Textract).
 
 ---
@@ -302,8 +307,9 @@ Loading (skeleton/spinner) · Empty · Error (message + retry) · Success. Optim
   One language across CDK + Lambdas + frontend (fewer context switches in a sprint).
 - **PDF text extraction:** **`unpdf`** (serverless-friendly), in-Lambda — no Textract.
 - **Storage:** **S3** (uploads), **DynamoDB** (single table).
-- **AI:** **Bedrock Claude Haiku 4.5** — single PRIMARY model for generation, vision, and
-  Quiz-Me. Sonnet 4.5 behind an `AI_MODEL_ID` flag as quality fallback only.
+- **AI:** **Amazon Bedrock — Amazon Nova Lite** as PRIMARY for generation, vision, and
+  Quiz-Me (`QUIZ_MODEL_ID` allows Nova Pro for the quiz path). Anthropic Claude wired as an
+  `AI_MODEL_ID` fallback (blocked on this account by Marketplace billing; see §0).
 - **Auth:** **Cognito** User Pool + the **Amplify Authenticator drop-in React component**
   (no Hosted UI redirect-flow debugging).
 - **IaC:** **AWS CDK (TypeScript)** — one command deploys the full stack. Zero console clicks

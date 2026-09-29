@@ -1,35 +1,41 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiPath, config } from '../config';
+import { apiFetch } from '../api';
+import type { UploadSummary } from '../types';
 
-type HealthState =
+type State =
   | { kind: 'loading' }
-  | { kind: 'ok'; model: string }
+  | { kind: 'loaded'; items: UploadSummary[] }
   | { kind: 'error'; message: string };
 
-/**
- * Dashboard placeholder (auth-gated). For now it confirms the authenticated
- * shell works and the backend is reachable. Upload list + kits arrive in T7-T9.
- */
-export default function Dashboard() {
-  const [health, setHealth] = useState<HealthState>({ kind: 'loading' });
+function StatusPill({ status }: { status: UploadSummary['status'] }) {
+  const cls =
+    status === 'READY' ? 'ok' : status === 'FAILED' ? 'error' : 'loading';
+  const label =
+    status === 'READY' ? 'Ready' : status === 'FAILED' ? 'Failed' : 'Processing';
+  return (
+    <span className={`pill ${cls}`}>
+      <span className="dot" /> {label}
+    </span>
+  );
+}
 
-  const checkHealth = useCallback(async () => {
-    setHealth({ kind: 'loading' });
+export default function Dashboard() {
+  const [state, setState] = useState<State>({ kind: 'loading' });
+
+  const load = useCallback(async () => {
+    setState({ kind: 'loading' });
     try {
-      const res = await fetch(apiPath('health'));
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as { status: string; model?: string };
-      if (data.status !== 'ok') throw new Error(`unexpected status: ${data.status}`);
-      setHealth({ kind: 'ok', model: data.model ?? 'unknown' });
+      const res = await apiFetch<{ items: UploadSummary[] }>('uploads');
+      setState({ kind: 'loaded', items: res.items });
     } catch (err) {
-      setHealth({ kind: 'error', message: err instanceof Error ? err.message : 'unknown error' });
+      setState({ kind: 'error', message: err instanceof Error ? err.message : 'Failed to load' });
     }
   }, []);
 
   useEffect(() => {
-    void checkHealth();
-  }, [checkHealth]);
+    void load();
+  }, [load]);
 
   return (
     <div className="page">
@@ -43,33 +49,47 @@ export default function Dashboard() {
         Upload lecture notes to generate summaries, flashcards, and adaptive quizzes.
       </p>
 
-      <div className="empty-card">
-        <p>No uploads yet.</p>
-        <p className="hint">Tap “Upload notes” to create your first study kit.</p>
-
-        {health.kind === 'loading' && (
+      {state.kind === 'loading' && (
+        <div className="empty-card">
           <span className="status-row loading">
-            <span className="dot" /> Checking backend…
+            <span className="dot" /> Loading your kits…
           </span>
-        )}
-        {health.kind === 'ok' && (
-          <span className="status-row ok">
-            <span className="dot" /> Backend connected · {health.model}
+        </div>
+      )}
+
+      {state.kind === 'error' && (
+        <div className="empty-card">
+          <span className="status-row error">
+            <span className="dot" /> {state.message}
           </span>
-        )}
-        {health.kind === 'error' && (
-          <>
-            <span className="status-row error">
-              <span className="dot" /> Backend unreachable
-            </span>
-            <div className="meta">{health.message}</div>
-            <button className="btn" onClick={() => void checkHealth()}>
-              Retry
-            </button>
-          </>
-        )}
-        <div className="meta">{config.apiUrl}</div>
-      </div>
+          <button className="btn" onClick={() => void load()}>
+            Retry
+          </button>
+        </div>
+      )}
+
+      {state.kind === 'loaded' && state.items.length === 0 && (
+        <div className="empty-card">
+          <p>No uploads yet.</p>
+          <p className="hint">Tap “Upload notes” to create your first study kit.</p>
+        </div>
+      )}
+
+      {state.kind === 'loaded' && state.items.length > 0 && (
+        <ul className="kit-list">
+          {state.items.map((it) => (
+            <li key={it.uploadId}>
+              <Link to={`/kits/${it.uploadId}`} className="kit-row">
+                <div className="kit-row-main">
+                  <span className="kit-name">{it.fileName}</span>
+                  <span className="kit-date">{new Date(it.createdAt).toLocaleString()}</span>
+                </div>
+                <StatusPill status={it.status} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

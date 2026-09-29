@@ -15,15 +15,25 @@ const env = {
 const alarmEmail =
   (app.node.tryGetContext('alarmEmail') as string | undefined) ?? process.env.ALARM_EMAIL;
 
+// Primary model: Amazon Nova Lite (first-party, multimodal, unblocked).
+// Claude Haiku stays available as an env-var fallback if the Anthropic
+// Marketplace subscription ever clears.
 const aiModelId =
   (app.node.tryGetContext('aiModelId') as string | undefined) ??
   process.env.AI_MODEL_ID ??
-  'us.anthropic.claude-haiku-4-5-20251001-v1:0';
+  'us.amazon.nova-lite-v1:0';
+
+// Per-feature override for Quiz-Me grading (defaults to the primary model).
+const quizModelId =
+  (app.node.tryGetContext('quizModelId') as string | undefined) ??
+  process.env.QUIZ_MODEL_ID ??
+  aiModelId;
 
 new StudySnapStack(app, 'StudySnapStack', {
   env,
   alarmEmail,
   aiModelId,
+  quizModelId,
   description: 'StudySnap — AI study assistant (skeleton: health + data + auth + billing alarm)',
   tags: {
     Project: 'StudySnap',

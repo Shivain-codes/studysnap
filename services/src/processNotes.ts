@@ -4,7 +4,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { generateKit } from './lib/kit';
 import { log } from './lib/logger';
-import type { ClaudeImage } from './lib/aiClient';
+import type { AIImage } from './lib/aiClient';
 
 const s3 = new S3Client({});
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
@@ -88,7 +88,7 @@ export async function handler(event: S3Event): Promise<void> {
         }
         kit = await generateKit({ notesText: text });
       } else if (contentType === 'image/jpeg' || contentType === 'image/png') {
-        const image: ClaudeImage = {
+        const image: AIImage = {
           mediaType: contentType,
           dataBase64: Buffer.from(bytes).toString('base64'),
         };

@@ -18,8 +18,10 @@ import * as path from 'path';
 export interface StudySnapStackProps extends cdk.StackProps {
   /** Email to receive the $20 billing alarm. If omitted, topic is created without a subscription. */
   readonly alarmEmail?: string;
-  /** Primary Bedrock model id (us. inference profile). Haiku 4.5 by default. */
+  /** Primary Bedrock model id (us. inference profile). Amazon Nova Lite by default. */
   readonly aiModelId: string;
+  /** Model id for the Quiz-Me grading path (may differ from primary). */
+  readonly quizModelId: string;
 }
 
 /**
@@ -116,6 +118,7 @@ export class StudySnapStack extends cdk.Stack {
       TABLE_NAME: table.tableName,
       UPLOADS_BUCKET: uploadsBucket.bucketName,
       AI_MODEL_ID: props.aiModelId,
+      QUIZ_MODEL_ID: props.quizModelId,
     };
     const makeLogGroup = (name: string) =>
       new logs.LogGroup(this, `${name}LogGroup`, {
@@ -176,6 +179,20 @@ export class StudySnapStack extends cdk.Stack {
     uploads.addMethod('GET', new apigateway.LambdaIntegration(listUploadsFn), cognitoAuth);
     uploads.addMethod('POST', new apigateway.LambdaIntegration(getUploadUrlFn), cognitoAuth);
 
+    // GET /uploads/{uploadId}
+    const getUploadFn = new lambdaNode.NodejsFunction(this, 'GetUploadFn', {
+      entry: path.join(__dirname, '..', '..', 'services', 'src', 'getUpload.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(15),
+      logGroup: makeLogGroup('GetUploadFn'),
+      environment: commonEnv,
+    });
+    table.grantReadData(getUploadFn);
+    const uploadItem = uploads.addResource('{uploadId}');
+    uploadItem.addMethod('GET', new apigateway.LambdaIntegration(getUploadFn), cognitoAuth);
+
     // ---- processNotes: S3-trigger -> Bedrock -> DynamoDB ----------------
     const processNotesFn = new lambdaNode.NodejsFunction(this, 'ProcessNotesFn', {
       entry: path.join(__dirname, '..', '..', 'services', 'src', 'processNotes.ts'),
@@ -193,30 +210,31 @@ export class StudySnapStack extends cdk.Stack {
     table.grantWriteData(processNotesFn);
     uploadsBucket.grantRead(processNotesFn);
 
-    // Bedrock: allow InvokeModel on the primary (Haiku) + Sonnet fallback, on BOTH
-    // the inference-profile ARNs and the underlying foundation-model ARNs
+    // Bedrock: allow InvokeModel on the primary (Amazon Nova) + Claude fallback,
+    // on BOTH the inference-profile ARNs and the underlying foundation-model ARNs
     // (cross-region inference profiles require both).
-    const modelSlugs = [
-      'claude-haiku-4-5-20251001-v1:0',
-      'claude-sonnet-4-5-20250929-v1:0',
-    ];
+    const usRegions = ['us-east-1', 'us-east-2', 'us-west-2'];
     const bedrockResources: string[] = [];
-    for (const slug of modelSlugs) {
-      // Inference profiles (us. and the region-specific copies).
+    const addModel = (vendor: string, slug: string) => {
       bedrockResources.push(
-        `arn:aws:bedrock:*:${this.account}:inference-profile/us.anthropic.${slug}`,
+        `arn:aws:bedrock:*:${this.account}:inference-profile/us.${vendor}.${slug}`,
       );
-      // Foundation models across US regions the profile can route to.
-      for (const r of ['us-east-1', 'us-east-2', 'us-west-2']) {
-        bedrockResources.push(`arn:aws:bedrock:${r}::foundation-model/anthropic.${slug}`);
+      for (const r of usRegions) {
+        bedrockResources.push(`arn:aws:bedrock:${r}::foundation-model/${vendor}.${slug}`);
       }
-    }
-    processNotesFn.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ['bedrock:InvokeModel'],
-        resources: bedrockResources,
-      }),
-    );
+    };
+    // Primary: Amazon Nova (Lite + Pro for the Quiz-Me path option).
+    addModel('amazon', 'nova-lite-v1:0');
+    addModel('amazon', 'nova-pro-v1:0');
+    // Fallback: Anthropic Claude (kept so an env flip needs no IAM redeploy).
+    addModel('anthropic', 'claude-haiku-4-5-20251001-v1:0');
+    addModel('anthropic', 'claude-sonnet-4-5-20250929-v1:0');
+
+    const bedrockPolicy = new iam.PolicyStatement({
+      actions: ['bedrock:InvokeModel'],
+      resources: bedrockResources,
+    });
+    processNotesFn.addToRolePolicy(bedrockPolicy);
 
     // Trigger processNotes when a file is uploaded under uploads/.
     uploadsBucket.addEventNotification(
