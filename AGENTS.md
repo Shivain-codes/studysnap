@@ -52,8 +52,8 @@ StudySnap provisions and deploys **entirely as code** — no console clicks for 
 The connection was established and verified as follows (capture screenshots at each ✎ for
 the submission):
 
-1. **AWS credentials** configured locally via `aws configure` (IAM user `<IAM_USER>`,
-   account `<AWS_ACCOUNT_ID>`, region `us-east-1`). ✎ screenshot: `aws sts get-caller-identity`.
+1. **AWS credentials** configured locally via `aws configure`
+   (account `<AWS_ACCOUNT_ID>`, region `us-east-1`). ✎ screenshot: `aws sts get-caller-identity`.
 2. **Bedrock access verified by real invocation** (not assumption): `bedrock-runtime
    invoke-model` against **`us.amazon.nova-lite-v1:0`** returned a live completion, and a
    real PDF upload produced a valid study kit (10 flashcards + 5 quiz). ✎ screenshot: the

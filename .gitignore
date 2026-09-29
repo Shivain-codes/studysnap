@@ -12,6 +12,7 @@ build/
 infra/cdk.out/
 cdk.out/
 *.d.ts.map
+infra/outputs.json
 
 # env / secrets
 .env

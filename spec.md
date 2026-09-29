@@ -11,7 +11,7 @@
 
 Confirmed by live `bedrock-runtime invoke-model`, not assumption:
 
-- **Account:** `<AWS_ACCOUNT_ID>` · **IAM user:** `<IAM_USER>` · **Region:** `us-east-1`
+- **Account:** `<AWS_ACCOUNT_ID>` · **Region:** `us-east-1`
 - **PRIMARY model (everything — kit generation, vision/handwriting, Quiz-Me turns):**
   **Amazon Nova Lite** `us.amazon.nova-lite-v1:0` — first-party AWS Bedrock model,
   multimodal, low latency/cost. **Proven by live invocation** (real READY kit: 10 flashcards
