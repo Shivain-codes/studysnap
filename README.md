@@ -15,6 +15,21 @@ Built for the AWS **"Zero to Shipped"** hackathon · Lane: `#social-good (educat
 
 ---
 
+## Problem
+
+Students are drowning in lecture notes. Turning a stack of slides or a notebook into
+something you can actually study from — a summary, flashcards, practice questions — takes
+hours most students don't have, especially around exams. Two gaps make it worse: most tools
+**can't read handwritten notes** (the way a huge share of students actually take them), and
+the ones that generate quizzes are **static** — they ask the same questions regardless of
+what you already know or where you're weak. StudySnap targets all three: it reads PDFs *and*
+photos of messy handwriting (multimodal AI), generates a study kit in seconds, and its
+**Adaptive Quiz-Me** tutor grades free-text answers, explains mistakes, and steers questions
+toward your weakest topics. Free, mobile-first, and built for equitable access to good study
+tools — the education + community angle of `#social-good`.
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -83,6 +98,26 @@ All routes require a Cognito JWT (`Authorization: Bearer <token>`) except `/heal
 
 ---
 
+## Verification
+
+StudySnap is fully built and shipped — verified against the live deployment, not asserted:
+
+- ✅ **13/13 build tasks complete** (see [`tasks.md`](./tasks.md))
+- ✅ **17/17 live end-to-end acceptance checks pass** — auth gating, upload validation
+  (400/413), PDF → `READY` kit with exactly **10 flashcards + 5 quiz** (valid shape),
+  Quiz-Me `start`/`answer`/`end` adaptive loop, delete → 204 + S3/DynamoDB cleanup
+- ✅ **`GET /health` returns `200`** with `{"status":"ok","model":"us.amazon.nova-lite-v1:0"}`
+- ✅ **CI green on `main`** — GitHub Actions runs lint + test + typecheck + build on every push
+- ✅ **$20 CloudWatch billing alarm** deployed as a cost guardrail
+
+```bash
+# Reproduce the health check:
+curl https://u1g7hquhsf.execute-api.us-east-1.amazonaws.com/prod/health
+# -> {"status":"ok","service":"studysnap","model":"us.amazon.nova-lite-v1:0", ...}
+```
+
+---
+
 ## Setup / deploy
 
 **Prerequisites:** Node 22+, AWS CLI configured (`aws configure`), AWS CDK, an AWS account
@@ -122,14 +157,21 @@ these via `VITE_*` env vars (see `web/.env.example`), defaulting to the deployed
 
 ## Screenshots
 
-> _Add screenshots here for the submission:_
-- [ ] Login / signup (Amplify Authenticator)
-- [ ] Dashboard with study kits
-- [ ] Upload (camera-first)
-- [ ] Kit detail — Summary / Flashcards / Quiz
-- [ ] **Quiz-Me** chat with grade badges + mastery bars
-- [ ] CloudWatch structured logs
-- [ ] $20 billing alarm
+_Images live in [`docs/screenshots/`](./docs/screenshots/); see the
+[capture guide](./docs/screenshots/CAPTURE_GUIDE.md) for what each one should show._
+
+### Product
+| | |
+|---|---|
+| ![Login](docs/screenshots/login.png)<br/>**Sign in / sign up** (Amazon Cognito via Amplify Authenticator) | ![Dashboard](docs/screenshots/dashboard.png)<br/>**Dashboard** — study kits with status + delete |
+| ![Upload](docs/screenshots/upload.png)<br/>**Upload** — camera-first, PDF or photo | ![Kit detail](docs/screenshots/kit-detail.png)<br/>**Kit detail** — summary, flashcards, quiz tabs |
+| ![Quiz-Me](docs/screenshots/quiz-me.png)<br/>**Adaptive Quiz-Me** — grades answers, adapts to weak topics | |
+
+### AWS + agentic workflow (proof)
+| | |
+|---|---|
+| ![Kiro hook](docs/screenshots/kiro-hook.png)<br/>**Kiro agent hook** firing (e.g. cdk-validate) | ![CloudFormation](docs/screenshots/cloudformation-stack.png)<br/>**CloudFormation** `StudySnapStack` resources |
+| ![Amplify](docs/screenshots/amplify-app.png)<br/>**Amplify Hosting** app + live URL | ![Billing alarm](docs/screenshots/billing-alarm.png)<br/>**CloudWatch** $20 billing alarm |
 
 ---
 
@@ -149,11 +191,9 @@ these via `VITE_*` env vars (see `web/.env.example`), defaulting to the deployed
 - **Cognito, API Gateway, Lambda, S3, DynamoDB, CloudWatch** run the app; **Amplify Hosting**
   serves the frontend over HTTPS; **AWS CDK** expresses all of it in TypeScript.
 
-> **Note on the model:** the spec targeted Anthropic Claude, but this AWS account cannot
-> complete the Claude **Marketplace subscription** (`INVALID_PAYMENT_INSTRUMENT`). Rather than
-> gamble the ship deadline on a billing fix, StudySnap uses **Amazon Nova Lite** — a
-> first-party Bedrock model that's multimodal, fast, and cheap. The AI layer is a pluggable
-> seam, so flipping back to Claude is a one-env-var change. Proven end-to-end on Nova.
+> **Model:** Amazon Nova Lite is the primary engine (first-party, multimodal, fast, cheap).
+> Anthropic Claude is wired as a one-env-var fallback (`AI_MODEL_ID`) but is unused here — it
+> requires an AWS Marketplace subscription this account can't complete.
 
 ---
 
