@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api';
 import type { UploadDetail } from '../types';
+import QuizMe from './QuizMe';
 
-type Tab = 'summary' | 'flashcards' | 'quiz';
+type Tab = 'summary' | 'flashcards' | 'quiz' | 'quizme';
 
 export default function KitDetail() {
   const { id } = useParams<{ id: string }>();
@@ -115,11 +116,18 @@ export default function KitDetail() {
                 >
                   Quiz
                 </button>
+                <button
+                  className={`tab ${tab === 'quizme' ? 'active' : ''}`}
+                  onClick={() => setTab('quizme')}
+                >
+                  Quiz-Me
+                </button>
               </div>
 
               {tab === 'summary' && <SummaryTab summary={detail.summary ?? ''} />}
               {tab === 'flashcards' && <FlashcardsTab cards={detail.flashcards ?? []} />}
               {tab === 'quiz' && <QuizTab quiz={detail.quiz ?? []} />}
+              {tab === 'quizme' && id && <QuizMe uploadId={id} />}
             </>
           )}
         </>

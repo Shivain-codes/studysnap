@@ -26,3 +26,27 @@ export interface UploadDetail extends UploadSummary {
   quiz?: QuizQuestion[];
   error?: string;
 }
+
+export interface MasteryEntry {
+  asked: number;
+  correct: number;
+  partial: number;
+  score: number;
+}
+export type Progress = Record<string, MasteryEntry>;
+
+export interface QuizMeStart {
+  sessionId: string;
+  question: { text: string; topic: string };
+  progress: Progress;
+}
+export interface QuizMeAnswer {
+  grade: 'correct' | 'partial' | 'incorrect';
+  explanation: string;
+  nextQuestion: { text: string; topic: string };
+  progress: Progress;
+}
+export interface QuizMeEnd {
+  summary: string;
+  mastery: Record<string, number>;
+}

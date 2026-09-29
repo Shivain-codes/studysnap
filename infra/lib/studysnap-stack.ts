@@ -243,6 +243,22 @@ export class StudySnapStack extends cdk.Stack {
       { prefix: 'uploads/' },
     );
 
+    // ---- Quiz-Me: adaptive session (POST /uploads/{id}/quiz-me) ---------
+    const quizMeFn = new lambdaNode.NodejsFunction(this, 'QuizMeFn', {
+      entry: path.join(__dirname, '..', '..', 'services', 'src', 'quizMe.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 512,
+      timeout: cdk.Duration.seconds(30),
+      logGroup: makeLogGroup('QuizMeFn'),
+      environment: commonEnv,
+    });
+    table.grantReadWriteData(quizMeFn);
+    quizMeFn.addToRolePolicy(bedrockPolicy);
+
+    const quizMe = uploadItem.addResource('quiz-me');
+    quizMe.addMethod('POST', new apigateway.LambdaIntegration(quizMeFn), cognitoAuth);
+
     // ---- $20 billing alarm ----------------------------------------------
     const billingTopic = new sns.Topic(this, 'BillingAlarmTopic', {
       displayName: 'StudySnap billing alarm',

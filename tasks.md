@@ -128,12 +128,18 @@
 
 ## Milestone F — Differentiator: Adaptive Quiz-Me
 
-### T10. `quizMe` Lambda + chat UI
-- [ ] `POST /uploads/{id}/quiz-me` actions: start / answer / end.
-- [ ] Grade (correct/partial/incorrect) + explain + pick next question biased to weak topics.
-- [ ] **Prompt context cap: summary + topics + mastery + last 10 turns only** (history persisted full).
-- [ ] Persist `SESSION#` history + `MASTERY#` counters (correct/asked ratio). Chat UI + mastery bars.
-- **Done when:** a session grades answers, explains mistakes, adapts, and mastery persists.
+### T10. `quizMe` Lambda + chat UI ✅ DONE (deployed & PROVEN end-to-end)
+- [x] `POST /uploads/{id}/quiz-me` actions: start / answer / end (quizMe Lambda).
+- [x] Grade (correct/partial/incorrect) + explain + pick next question biased to weakest topic.
+- [x] **Prompt context cap: summary + topic + last 10 turns** (full history persisted separately).
+- [x] Persist `SESSION#` history + `MASTERY#` counters; score = (correct + 0.5·partial)/asked.
+- [x] Chat UI: bubbles, per-answer grade badge (green/amber/red) + explanation, live mastery bars,
+      End → recap. Wired as 4th tab in Kit detail.
+- [x] Uses `QUIZ_MODEL_ID` (Nova Lite; can flip to Nova Pro).
+- **PROVEN live:** start → Q on weak topic; correct answer graded `correct` (mastery→1) and
+  adapted to a new topic; wrong "mitochondria" answer graded `incorrect` with correct explanation;
+  end → recap "Strong: Light-dependent reactions. Focus: Calvin cycle" + persisted mastery.
+- **Bug found+fixed via structured logs:** DynamoDB reserved word `partial` → aliased with `#partial`.
 - **Commit:** `feat(quiz-me): adaptive session + mastery tracking`
 
 ---
