@@ -1,4 +1,4 @@
-# StudySnap 📚⚡
+# StudySnap 
 
 **Turn any lecture notes into summaries, flashcards, and quizzes in seconds.**
 
