@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { StudySnapStack } from '../lib/studysnap-stack';
+import { GithubOidcStack } from '../lib/github-oidc-stack';
 
 const app = new cdk.App();
 
@@ -40,4 +41,14 @@ new StudySnapStack(app, 'StudySnapStack', {
     Hackathon: 'zero-to-shipped',
     Lane: 'social-good-community',
   },
+});
+
+// GitHub Actions OIDC deploy role (T4 CI/CD). Separate stack so it never
+// interferes with the app stack. Owner/repo overridable via context.
+new GithubOidcStack(app, 'StudySnapGithubOidcStack', {
+  env,
+  githubOwner: (app.node.tryGetContext('githubOwner') as string) ?? 'Shivain-codes',
+  githubRepo: (app.node.tryGetContext('githubRepo') as string) ?? 'studysnap',
+  description: 'GitHub Actions OIDC provider + deploy role for StudySnap',
+  tags: { Project: 'StudySnap' },
 });
