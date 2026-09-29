@@ -1,0 +1,17 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - npm --workspace web run build
+  artifacts:
+    # Serve the built Vite app from the web workspace.
+    baseDirectory: web/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
