@@ -250,7 +250,13 @@ a.btn {
   flex-direction: column;
   gap: 0.6rem;
 }
+.kit-li {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
 .kit-row {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -261,6 +267,19 @@ a.btn {
   padding: 0.9rem 1.1rem;
   text-decoration: none;
   color: var(--ink);
+}
+.kit-delete {
+  border: none;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: 0.9rem;
+  padding: 0 0.9rem;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.kit-delete:hover {
+  color: var(--error);
 }
 .kit-row-main {
   display: flex;

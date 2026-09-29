@@ -193,6 +193,20 @@ export class StudySnapStack extends cdk.Stack {
     const uploadItem = uploads.addResource('{uploadId}');
     uploadItem.addMethod('GET', new apigateway.LambdaIntegration(getUploadFn), cognitoAuth);
 
+    // DELETE /uploads/{uploadId}
+    const deleteUploadFn = new lambdaNode.NodejsFunction(this, 'DeleteUploadFn', {
+      entry: path.join(__dirname, '..', '..', 'services', 'src', 'deleteUpload.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(20),
+      logGroup: makeLogGroup('DeleteUploadFn'),
+      environment: commonEnv,
+    });
+    table.grantReadWriteData(deleteUploadFn);
+    uploadsBucket.grantDelete(deleteUploadFn);
+    uploadItem.addMethod('DELETE', new apigateway.LambdaIntegration(deleteUploadFn), cognitoAuth);
+
     // ---- processNotes: S3-trigger -> Bedrock -> DynamoDB ----------------
     const processNotesFn = new lambdaNode.NodejsFunction(this, 'ProcessNotesFn', {
       entry: path.join(__dirname, '..', '..', 'services', 'src', 'processNotes.ts'),

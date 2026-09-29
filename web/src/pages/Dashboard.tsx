@@ -33,6 +33,19 @@ export default function Dashboard() {
     }
   }, []);
 
+  const remove = useCallback(
+    async (uploadId: string) => {
+      if (!confirm('Delete this upload and its study kit?')) return;
+      try {
+        await apiFetch(`uploads/${uploadId}`, { method: 'DELETE' });
+        await load();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : 'Delete failed');
+      }
+    },
+    [load],
+  );
+
   useEffect(() => {
     void load();
   }, [load]);
@@ -78,7 +91,7 @@ export default function Dashboard() {
       {state.kind === 'loaded' && state.items.length > 0 && (
         <ul className="kit-list">
           {state.items.map((it) => (
-            <li key={it.uploadId}>
+            <li key={it.uploadId} className="kit-li">
               <Link to={`/kits/${it.uploadId}`} className="kit-row">
                 <div className="kit-row-main">
                   <span className="kit-name">{it.fileName}</span>
@@ -86,6 +99,13 @@ export default function Dashboard() {
                 </div>
                 <StatusPill status={it.status} />
               </Link>
+              <button
+                className="kit-delete"
+                aria-label={`Delete ${it.fileName}`}
+                onClick={() => void remove(it.uploadId)}
+              >
+                ✕
+              </button>
             </li>
           ))}
         </ul>

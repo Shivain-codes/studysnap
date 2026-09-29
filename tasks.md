@@ -146,10 +146,14 @@
 
 ## Milestone G — Polish & Ship Quality
 
-### T11. Delete + logging
-- [ ] `DELETE /uploads/{id}`: remove S3 object + `UPLOAD#`/`SESSION#*`/`MASTERY#*` items → 204.
-- [ ] Structured JSON logging (requestId, userId, uploadId, latency) in every Lambda.
-- **Done when:** delete fully cleans up; CloudWatch shows structured logs per invocation.
+### T11. Delete + logging ✅ DONE (deployed & verified)
+- [x] `DELETE /uploads/{id}` deleteUpload Lambda: removes S3 object + `UPLOAD#` +
+      all `SESSION#<id>#*` + `MASTERY#<id>#*` items → 204. Ownership-scoped (PK = user).
+- [x] Frontend: delete (✕) button on each dashboard row with confirm.
+- [x] Structured JSON logging (`log.info/warn/error` with requestId/userId/uploadId) in all
+      7 handlers; each Lambda has its own CloudWatch log group (1-week retention).
+- **VERIFIED:** delete removed exactly the target upload's UPLOAD#/SESSION#/MASTERY# + S3 object,
+  left other uploads' data intact (204). Structured logs confirmed (surfaced the `partial` bug live).
 - **Commit:** `feat: delete flow + structured cloudwatch logging`
 
 ### T12. README + proof
