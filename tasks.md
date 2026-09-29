@@ -40,15 +40,18 @@
 - **Note:** manual deploy for Day-1 speed; git-based Amplify CI wired in T4 once repo exists.
 - **Commit:** `feat(web): app shell wired to /health, deployed to Amplify`
 
-### T4. CI/CD — GitHub Actions 🟡 WORKFLOW WRITTEN — needs repo + OIDC role to activate
-- [x] `.github/workflows/deploy.yml`: push to `main` → npm ci → lint → test → typecheck →
-      build frontend → (OIDC) `cdk deploy` backend → optional Amplify frontend deploy.
-- [x] Uses **GitHub OIDC** (`vars.AWS_DEPLOY_ROLE_ARN`) — no long-lived secrets. Steps are
-      guarded so the workflow is valid even before the role/repo vars exist.
-- [ ] **Needs from user:** create/point a GitHub repo; add an IAM role trusting the repo
-      (OIDC) as repo variable `AWS_DEPLOY_ROLE_ARN`; optional `AMPLIFY_APP_ID=d1wkxjr5bl55l7`.
-      Then connect the repo to Amplify Hosting for git-based frontend builds.
-- **Commit:** `ci: deploy workflow (push to main -> lint/test/build/deploy via OIDC)`
+### T4. CI/CD ✅ DONE — Amplify Git auto-deploy + GitHub Actions CI
+- [x] **GitHub Actions CI** (`.github/workflows/deploy.yml`): push/PR to `main` →
+      lint → test → typecheck → build. **Verified GREEN** (run 36606454195, 33s). Secret-free.
+- [x] **Frontend CD via AWS Amplify Hosting**: `amplify.yml` build spec (npm ci → build web →
+      serve `web/dist`). Push to `main` auto-builds once the repo is connected (one-time console step).
+- [x] **Backend CD**: `npm run deploy` (CDK) — one command, run with AWS creds.
+- **Why not OIDC:** GitHub→AWS OIDC assume-role kept failing (`AssumeRoleWithWebIdentity`
+  denied despite correct trust/provider). Rather than burn time, switched to Amplify's native
+  Git CD (zero secrets, cleaner) + CI-only Actions. Removed the unused OIDC stack/role/provider.
+- **One-time user step:** Amplify console → app `d1wkxjr5bl55l7` → connect repo
+  `Shivain-codes/studysnap` branch `main` → authorize GitHub. Then pushes auto-deploy the frontend.
+- **Commit:** `ci: Amplify Git auto-deploy + CI-only Actions`
 
 ---
 

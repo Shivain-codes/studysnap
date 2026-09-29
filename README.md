@@ -99,10 +99,15 @@ cd infra && npx cdk bootstrap && cd ..
 #    Pass an email to receive the billing alarm:
 npm run deploy -- -c alarmEmail=you@example.com
 
-# 4. Frontend: build and host on Amplify
-npm --workspace web run build
-# (connect the repo to Amplify Hosting, or deploy web/dist via the Amplify console/CLI)
+# 4. Frontend: connect the repo to Amplify Hosting (one-time)
+#    Amplify console -> app -> "Connect repository" -> GitHub -> this repo, branch main.
+#    Amplify reads amplify.yml and auto-builds/deploys on every push to main.
+npm --workspace web run build   # optional local build
 ```
+
+**CI/CD:** GitHub Actions runs lint/test/typecheck/build on every push (secret-free).
+The **frontend** auto-deploys via Amplify Hosting's Git integration; the **backend**
+deploys with `npm run deploy` (CDK).
 
 The CDK stack outputs the API URL, Cognito IDs, bucket, and table names. The frontend reads
 these via `VITE_*` env vars (see `web/.env.example`), defaulting to the deployed stack.
