@@ -157,19 +157,33 @@ these via `VITE_*` env vars (see `web/.env.example`), defaulting to the deployed
 
 ## Screenshots
 
-Full gallery in [`docs/screenshots/`](./docs/screenshots/). These capture the live app
-(sign-in, dashboard, kit detail, flashcards, quiz, adaptive Quiz-Me) plus the AWS console
-proof (CloudFormation stack, Lambda functions, DynamoDB, S3, API Gateway, Cognito, Amplify
-Hosting) and the Kiro agent hooks that drove the build.
+Full gallery in [`docs/screenshots/`](./docs/screenshots/). Everything below is provisioned
+as code (AWS CDK) and driven by Kiro agent hooks — the console views are proof, not clicks.
 
-| | | |
-|---|---|---|
-| ![](docs/screenshots/screenshot-01.png) | ![](docs/screenshots/screenshot-02.png) | ![](docs/screenshots/screenshot-03.png) |
-| ![](docs/screenshots/screenshot-04.png) | ![](docs/screenshots/screenshot-05.png) | ![](docs/screenshots/screenshot-06.png) |
-| ![](docs/screenshots/screenshot-07.png) | ![](docs/screenshots/screenshot-08.png) | ![](docs/screenshots/screenshot-09.png) |
-| ![](docs/screenshots/screenshot-10.png) | ![](docs/screenshots/screenshot-11.png) | ![](docs/screenshots/screenshot-12.png) |
-| ![](docs/screenshots/screenshot-13.png) | ![](docs/screenshots/screenshot-14.png) | ![](docs/screenshots/screenshot-15.png) |
-| ![](docs/screenshots/screenshot-16.png) | | |
+### Infrastructure as code — CloudFormation
+| | |
+|---|---|
+| ![CloudFormation stack](docs/screenshots/cloudformation-stack.png)<br/>**CloudFormation** — StudySnap stack, `CREATE_COMPLETE` | ![CloudFormation resources](docs/screenshots/cloudformation-resources.png)<br/>**Stack resources** — all provisioned as code |
+| ![StudySnap resources](docs/screenshots/studysnap-resources.png)<br/>**StudySnapStack** resource list | |
+
+### Backend services
+| | |
+|---|---|
+| ![Lambda functions](docs/screenshots/lambda-functions.png)<br/>**Lambda** — the StudySnap functions (Node.js 22) | ![DynamoDB](docs/screenshots/dynamodb-table.png)<br/>**DynamoDB** — `StudySnap` single table (on-demand, PITR) |
+| ![Cognito user pool](docs/screenshots/cognito-userpool.png)<br/>**Cognito** — `studysnap-users` user pool | ![Cognito resources](docs/screenshots/cognito-resources.png)<br/>**Cognito** — app client / resources |
+| ![S3 uploads bucket](docs/screenshots/s3-buckets.png)<br/>**S3** — uploads + CDK asset buckets | ![S3 assets](docs/screenshots/s3-assets.png)<br/>**S3** — Lambda deploy artifacts |
+
+### Hosting + observability
+| | |
+|---|---|
+| ![Amplify app](docs/screenshots/amplify-app.png)<br/>**Amplify Hosting** — live `*.amplifyapp.com` URL | ![Amplify logs](docs/screenshots/amplify-logs.png)<br/>**Amplify** — access logs |
+| ![CloudWatch](docs/screenshots/cloudwatch-1.png)<br/>**CloudWatch** — metrics / monitoring | ![CloudWatch 2](docs/screenshots/cloudwatch-2.png)<br/>**CloudWatch** — logs / alarms |
+
+### Agentic workflow — Kiro hooks
+| | |
+|---|---|
+| ![Pre-commit hook](docs/screenshots/kiro-hook-precommit.png)<br/>**Pre-commit hook** — lint + tests gate | ![Post-edit hook](docs/screenshots/kiro-hook-postedit.png)<br/>**Post-edit hook** — typecheck on save |
+| ![CDK validate hook](docs/screenshots/kiro-hook-cdk-validate.png)<br/>**CDK-validate hook** — `cdk synth` on infra change | |
 
 ---
 
