@@ -157,21 +157,19 @@ these via `VITE_*` env vars (see `web/.env.example`), defaulting to the deployed
 
 ## Screenshots
 
-_Images live in [`docs/screenshots/`](./docs/screenshots/); see the
-[capture guide](./docs/screenshots/CAPTURE_GUIDE.md) for what each one should show._
+Full gallery in [`docs/screenshots/`](./docs/screenshots/). These capture the live app
+(sign-in, dashboard, kit detail, flashcards, quiz, adaptive Quiz-Me) plus the AWS console
+proof (CloudFormation stack, Lambda functions, DynamoDB, S3, API Gateway, Cognito, Amplify
+Hosting) and the Kiro agent hooks that drove the build.
 
-### Product
-| | |
-|---|---|
-| ![Login](docs/screenshots/login.png)<br/>**Sign in / sign up** (Amazon Cognito via Amplify Authenticator) | ![Dashboard](docs/screenshots/dashboard.png)<br/>**Dashboard** — study kits with status + delete |
-| ![Upload](docs/screenshots/upload.png)<br/>**Upload** — camera-first, PDF or photo | ![Kit detail](docs/screenshots/kit-detail.png)<br/>**Kit detail** — summary, flashcards, quiz tabs |
-| ![Quiz-Me](docs/screenshots/quiz-me.png)<br/>**Adaptive Quiz-Me** — grades answers, adapts to weak topics | |
-
-### AWS + agentic workflow (proof)
-| | |
-|---|---|
-| ![Kiro hook](docs/screenshots/kiro-hook.png)<br/>**Kiro agent hook** firing (e.g. cdk-validate) | ![CloudFormation](docs/screenshots/cloudformation-stack.png)<br/>**CloudFormation** `StudySnapStack` resources |
-| ![Amplify](docs/screenshots/amplify-app.png)<br/>**Amplify Hosting** app + live URL | ![Billing alarm](docs/screenshots/billing-alarm.png)<br/>**CloudWatch** $20 billing alarm |
+| | | |
+|---|---|---|
+| ![](docs/screenshots/screenshot-01.png) | ![](docs/screenshots/screenshot-02.png) | ![](docs/screenshots/screenshot-03.png) |
+| ![](docs/screenshots/screenshot-04.png) | ![](docs/screenshots/screenshot-05.png) | ![](docs/screenshots/screenshot-06.png) |
+| ![](docs/screenshots/screenshot-07.png) | ![](docs/screenshots/screenshot-08.png) | ![](docs/screenshots/screenshot-09.png) |
+| ![](docs/screenshots/screenshot-10.png) | ![](docs/screenshots/screenshot-11.png) | ![](docs/screenshots/screenshot-12.png) |
+| ![](docs/screenshots/screenshot-13.png) | ![](docs/screenshots/screenshot-14.png) | ![](docs/screenshots/screenshot-15.png) |
+| ![](docs/screenshots/screenshot-16.png) | | |
 
 ---
 
